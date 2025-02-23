@@ -3,7 +3,11 @@ name: Backend Deploy
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:    # 수동 트리거 추가
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   deploy:
