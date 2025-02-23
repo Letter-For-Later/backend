@@ -2,7 +2,9 @@ name: Backend Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
+      - "5-feat-deployment"
   workflow_dispatch:
 
 permissions:
