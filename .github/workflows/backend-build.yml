@@ -5,7 +5,9 @@ on:
     branches: [ "main" ]
 
 permissions:
-  pull-requests: write  # PR 코멘트 권한
+  checks: write        # check runs 생성 권한
+  pull-requests: write # PR 코멘트 권한
+  contents: read      # 코드 읽기 권한
 
 jobs:
   build:
