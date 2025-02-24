@@ -57,42 +57,30 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            echo "=== System Info ==="
-            df -h
-            free -m
-            
             echo "=== Current Directory ==="
-            pwd
-            ls -la
-            
-            echo "=== App Directory ==="
             cd ~/app
             pwd
             ls -la
             
-            echo "=== Java Version ==="
-            java -version
-            
             echo "=== Kill Old Process ==="
             pkill -f 'java -jar' || true
+            sleep 5  # 이전 프로세스가 완전히 종료되도록 대기
             
             echo "=== Start Application ==="
             nohup java -jar *.jar > app.log 2>&1 &
             APP_PID=$!
             echo $APP_PID > app.pid
             
-            echo "=== Initial Log Check ==="
-            sleep 5
-            cat app.log
-            
-            echo "=== Process Status ==="
-            ps aux | grep java
-            
-            echo "=== Final Check ==="
+            echo "=== Check Application Status ==="
+            sleep 10
             if ps -p $APP_PID > /dev/null; then
-              echo "Process is running"
+              echo "Application started successfully"
+              echo "=== Application Logs ==="
+              tail -n 20 app.log
               exit 0
             else
-              echo "Process failed to start"
+              echo "Application failed to start"
+              echo "=== Error Logs ==="
+              cat app.log
               exit 1
             fi
