@@ -37,7 +37,7 @@ jobs:
       - name: Gradle 빌드
         run: |
           chmod +x gradlew
-          ./gradlew clean build -x test  # 테스트 제외 (이미 CI에서 검증됨)
+          ./gradlew clean build -x test
 
       - name: 파일 전송
         uses: appleboy/scp-action@master
@@ -56,48 +56,29 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          command_timeout: 30m
           script: |
-            echo "=== Setup Directories ==="
             cd ~/app
             
             echo "=== Kill Old Process ==="
             pkill -f 'java -jar' || true
-            sleep 5
+            sleep 2
             
             echo "=== Start Application ==="
-            # 절대 경로 사용
-            APP_DIR="/home/***/app"
-            LOG_FILE="$APP_DIR/app.log"
-            PID_FILE="$APP_DIR/app.pid"
-            JAR_FILE="$APP_DIR/build/libs/letter-0.0.1-SNAPSHOT.jar"
+            JAR_FILE="build/libs/letter-0.0.1-SNAPSHOT.jar"
             
-            # 로그 파일 생성
-            touch "$LOG_FILE"
-            
-            echo "Starting application from $(pwd)"
-            echo "Using JAR: $JAR_FILE"
-            echo "Log file: $LOG_FILE"
-            
-            # nohup으로 실행
-            nohup java -jar "$JAR_FILE" > "$LOG_FILE" 2>&1 &
-            
-            # PID 저장
-            APP_PID=$!
-            echo $APP_PID > "$PID_FILE"
-            
-            echo "Started with PID: $APP_PID"
+            # application.yml에 포트가 이미 설정되어 있으므로 -Dserver.port 제거
+            nohup java -jar "$JAR_FILE" > app.log 2>&1 & disown
             
             # 프로세스 확인
             sleep 5
-            if ps -p $APP_PID > /dev/null; then
-              echo "Process is running"
-              echo "Recent logs:"
-              tail -n 20 "$LOG_FILE"
+            if pgrep -f 'java -jar'; then
+              echo "Application started successfully"
+              echo "=== Port Status ==="
+              netstat -tulpn | grep 8081
+              tail -n 20 app.log
               exit 0
             else
-              echo "Process failed to start"
-              echo "Error logs:"
-              cat "$LOG_FILE"
+              echo "Application failed to start"
+              cat app.log
               exit 1
             fi
