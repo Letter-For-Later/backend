@@ -8,8 +8,13 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug          # SQL 쿼리 확인
+    org.hibernate.orm.jdbc.bind: trace    # 쿼리 파라미터 확인
+    com.letter: debug                 # 프로젝트 패키지의 모든 로그
