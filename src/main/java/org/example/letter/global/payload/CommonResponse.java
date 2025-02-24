@@ -1,13 +1,10 @@
-package org.example.letter.global.common.response;
+package org.example.letter.global.payload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.example.letter.global.common.code.BaseCode;
-import org.example.letter.global.common.code.SuccessStatus;
-import org.example.letter.global.payload.BaseCode;
 import org.example.letter.global.payload.status.SuccessStatus;
 
 @Getter
