@@ -59,26 +59,31 @@ jobs:
           script: |
             cd ~/app
             
-            echo "=== Kill Old Process ==="
-            pkill -f 'java -jar' || true
-            sleep 2
+            # 이전 프로세스 종료
+            if [ -f app.pid ]; then
+              kill $(cat app.pid) || true
+              rm app.pid
+            fi
             
-            echo "=== Start Application ==="
+            # 새로운 프로세스 시작 (백그라운드로)
             JAR_FILE="build/libs/letter-0.0.1-SNAPSHOT.jar"
             
-            # application.yml에 포트가 이미 설정되어 있으므로 -Dserver.port 제거
-            nohup java -jar "$JAR_FILE" > app.log 2>&1 & disown
+            # 로그 초기화
+            echo "" > app.log
             
-            # 프로세스 확인
-            sleep 5
-            if pgrep -f 'java -jar'; then
-              echo "Application started successfully"
-              echo "=== Port Status ==="
-              netstat -tulpn | grep 8081
-              tail -n 20 app.log
+            # 프로세스 시작 및 PID 저장을 분리
+            java -jar "$JAR_FILE" > app.log 2>&1 & 
+            echo $! > app.pid
+            
+            # 짧은 대기
+            sleep 2
+            
+            # PID로 프로세스 확인
+            if [ -f app.pid ] && ps -p $(cat app.pid) > /dev/null; then
+              echo "Application started with PID: $(cat app.pid)"
               exit 0
             else
-              echo "Application failed to start"
+              echo "Failed to start application"
               cat app.log
               exit 1
             fi
