@@ -2,7 +2,12 @@ name: Backend Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - "main"
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   deploy:
@@ -30,7 +35,7 @@ jobs:
       - name: Gradle 빌드
         run: |
           chmod +x gradlew
-          ./gradlew clean build -x test  # 테스트 제외 (이미 CI에서 검증됨)
+          ./gradlew clean build -x test
 
       - name: 파일 전송
         uses: appleboy/scp-action@master
@@ -50,6 +55,33 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            pkill -f 'java -jar' || true
             cd ~/app
-            nohup java -jar *.jar > app.log 2>&1 &
+            
+            # 이전 프로세스 종료
+            if [ -f app.pid ]; then
+              kill $(cat app.pid) || true
+              rm app.pid
+            fi
+            
+            # 새로운 프로세스 시작 (백그라운드로)
+            JAR_FILE="build/libs/letter-0.0.1-SNAPSHOT.jar"
+            
+            # 로그 초기화
+            echo "" > app.log
+            
+            # 프로세스 시작 및 PID 저장을 분리
+            java -jar "$JAR_FILE" > app.log 2>&1 & 
+            echo $! > app.pid
+            
+            # 짧은 대기
+            sleep 2
+            
+            # PID로 프로세스 확인
+            if [ -f app.pid ] && ps -p $(cat app.pid) > /dev/null; then
+              echo "Application started with PID: $(cat app.pid)"
+              exit 0
+            else
+              echo "Failed to start application"
+              cat app.log
+              exit 1
+            fi
