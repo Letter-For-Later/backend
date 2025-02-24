@@ -56,27 +56,34 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
+          command_timeout: 30m
           script: |
-            echo "=== Current Directory ==="
-            cd ~/app
+            cd ~/app/build/libs  # JAR 파일이 있는 정확한 위치로 이동
+            
+            echo "=== Current Location ==="
             pwd
             ls -la
             
             echo "=== Kill Old Process ==="
             pkill -f 'java -jar' || true
-            sleep 5  # 이전 프로세스가 완전히 종료되도록 대기
+            sleep 5
             
             echo "=== Start Application ==="
-            nohup java -jar *.jar > app.log 2>&1 &
+            JAR_FILE=$(ls -t | grep -v 'plain.jar' | head -1)  # plain.jar 제외하고 가장 최신 jar 선택
+            echo "Starting JAR file: $JAR_FILE"
+            
+            nohup java -jar "$JAR_FILE" > ../../app.log 2>&1 &
             APP_PID=$!
-            echo $APP_PID > app.pid
+            echo $APP_PID > ../../app.pid
+            
+            cd ../..  # 원래 app 디렉토리로 돌아가기
             
             echo "=== Check Application Status ==="
-            sleep 10
+            sleep 20  # 대기 시간 증가
             if ps -p $APP_PID > /dev/null; then
               echo "Application started successfully"
               echo "=== Application Logs ==="
-              tail -n 20 app.log
+              tail -n 50 app.log  # 더 많은 로그 확인
               exit 0
             else
               echo "Application failed to start"
