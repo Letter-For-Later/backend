@@ -10,7 +10,7 @@ import org.example.letter.global.payload.status.SuccessStatus;
 @Getter
 @AllArgsConstructor
 @JsonPropertyOrder({"isSuccess", "code", "message", "result"})
-public class CommonResponse<T> {
+public class CommonResponse<T> {    // ApiResponse -> CommonResponse
 
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
