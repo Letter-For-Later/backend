@@ -1,6 +1,7 @@
 package org.example.letter.domain.letter.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.example.letter.domain.notification.entity.Notification;
 import org.example.letter.global.domain.BaseEntity;
@@ -27,7 +28,7 @@ public class Letter extends BaseEntity {
     @Column(length = LetterConstants.MAX_RECEIVER_LENGTH)
     private String receiver;
 
-    @Column(nullable = false)
+    @NotNull
     @Enumerated(EnumType.STRING)
     private LetterStatus status;
 
