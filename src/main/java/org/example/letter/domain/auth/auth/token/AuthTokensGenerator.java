@@ -22,8 +22,24 @@ public class AuthTokensGenerator {
 
         //String subject = email.toString();
         String accessToken = jwtTokenProvider.accessTokenGenerate(uid, accessTokenExpiredAt);
-        String refreshToken = jwtTokenProvider.refreshTokenGenerate(refreshTokenExpiredAt);
+        String refreshToken = jwtTokenProvider.refreshTokenGenerate(uid, refreshTokenExpiredAt);
 
         return AuthTokens.of(accessToken, refreshToken, BEARER_TYPE, ACCESS_TOKEN_EXPIRE_TIME / 1000L);
+    }
+    // refresh token을 이용하여 새로운 access token 재발급
+    public AuthTokens refreshAccessToken(String refreshToken) {
+        // refresh token 유효성 검사
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+        // refresh token에서 uid 추출
+        String uid = jwtTokenProvider.getSubject(refreshToken);
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiredAt = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        String newAccessToken = jwtTokenProvider.accessTokenGenerate(uid, accessTokenExpiredAt);
+
+        // 여기서는 refresh token은 그대로 재사용합니다.
+        return new AuthTokens(newAccessToken, refreshToken, BEARER_TYPE, ACCESS_TOKEN_EXPIRE_TIME / 1000L);
     }
 }
