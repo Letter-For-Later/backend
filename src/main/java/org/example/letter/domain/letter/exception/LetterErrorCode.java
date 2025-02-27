@@ -14,7 +14,6 @@ public enum LetterErrorCode implements BaseErrorCode {
     LETTER_INVALID_RESERVATION(HttpStatus.BAD_REQUEST, "LETTER_400_2", "잘못된 예약 시간입니다."),
     LETTER_CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "LETTER_400_3", "편지 내용이 너무 깁니다."),
     LETTER_SENDER_REQUIRED(HttpStatus.BAD_REQUEST, "LETTER_400_4", "발신자 정보는 필수입니다."),
-    LETTER_INVALID_DATE(HttpStatus.BAD_REQUEST, "LETTER_400_5", "유효하지 않은 날짜입니다."),
     LETTER_CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "LETTER_400_5", "편지 내용은 필수입니다."),
     LETTER_RECEIVER_REQUIRED(HttpStatus.BAD_REQUEST, "LETTER_400_6", "수신자 정보는 필수입니다."),
     LETTER_RECEIVER_TOO_LONG(HttpStatus.BAD_REQUEST, "LETTER_400_7", "수신자 이름이 너무 깁니다."),
