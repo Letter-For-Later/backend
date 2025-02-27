@@ -19,7 +19,7 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class LetterService {
+public class LetterService { // 서비스 인터페이스 추가하기
 
     private final LetterRepository letterRepository;
     private final UserRepository userRepository;
