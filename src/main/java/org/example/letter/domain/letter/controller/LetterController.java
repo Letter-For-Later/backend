@@ -74,6 +74,8 @@ public class LetterController {
         return CommonResponse.onSuccess(letterService.getLetterSummary());
     }
 
+    // 날짜, 시간, 수신자(내가 보내서 받는 사람)
+    // 시간은 아침(9시), 점심(13시), 저녁(18시)
     @Operation(summary = "예약 편지 목록 조회", description = "예약된 편지 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -86,6 +88,8 @@ public class LetterController {
                         letterService.getReservedLetters(), false));
     }
 
+    // 날짜, 시간, 수신자(내가 보내서 받는 사람)
+    // 시간은 아침(9시), 점심(13시), 저녁(18시)
     @Operation(summary = "보낸 편지 목록 조회", description = "발송 완료된 편지 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -98,6 +102,8 @@ public class LetterController {
                         letterService.getSentLetters(), false));
     }
 
+    // 날짜, 시간, 발신자(나에게 보낸 사람)
+    // 시간은 아침(9시), 점심(13시), 저녁(18시)
     @Operation(summary = "받은 편지 목록 조회", description = "수신한 편지 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -110,6 +116,21 @@ public class LetterController {
                         letterService.getReceivedLetters(), true));
     }
 
+    // letterId 와 이름을 리스트로 담아서 주자
+    // 날짜 및 시간은 null 로 보내자
+    @Operation(summary = "임시보관 편지 목록 조회", description = "임시보관된 편지 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/drafts")
+    public CommonResponse<LetterResponseDTO.LetterListResponse> getDraftLetters() {
+        return CommonResponse.onSuccess(
+                LetterResponseDTO.LetterListResponse.of(
+                        letterService.getDraftLetters(), false));
+    }
+
+    // 날짜, 시간, 수신자(내가 보내서 받는 사람), 내용, 발송까지 남은 기간(day)
     @Operation(summary = "예약 편지 상세 조회", description = "예약된 편지의 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -126,6 +147,7 @@ public class LetterController {
                         letterService.getLetter(letterId)));
     }
 
+    // 날짜, 시간, 수신자(내가 보내서 받는 사람), 내용
     @Operation(summary = "보낸 편지 상세 조회", description = "발송 완료된 편지의 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -142,6 +164,7 @@ public class LetterController {
                         letterService.getLetter(letterId), false));
     }
 
+    // 날짜, 시간, 발신자(나에게 보낸 사람), 내용
     @Operation(summary = "받은 편지 상세 조회", description = "수신한 편지의 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -158,18 +181,7 @@ public class LetterController {
                         letterService.getLetter(letterId), true));
     }
 
-    @Operation(summary = "임시보관 편지 목록 조회", description = "임시보관된 편지 목록을 조회합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @GetMapping("/drafts")
-    public CommonResponse<LetterResponseDTO.LetterListResponse> getDraftLetters() {
-        return CommonResponse.onSuccess(
-                LetterResponseDTO.LetterListResponse.of(
-                        letterService.getDraftLetters(), false));
-    }
-
+    // 발신자, 내용, 수신자
     @Operation(summary = "임시보관 편지 상세 조회", description = "임시보관된 편지의 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),

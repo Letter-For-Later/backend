@@ -1,6 +1,7 @@
 package org.example.letter.domain.notification.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,28 +24,33 @@ public class Notification extends BaseEntity {
     private String id;  // UUID 사용
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "letter_id", nullable = false)
+    @NotNull
+    @JoinColumn(name = "letter_id")
     private Letter letter;
 
-    @Column(name = "phone_number", nullable = false)
+    @NotNull
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "access_url", nullable = false)
+    @NotNull
+    @Column(name = "access_url")
     private String accessUrl;
 
     // 예약 시간
-    @Column(name = "reservation_date_time", nullable = false)
+    @NotNull
+    @Column(name = "reservation_date_time")
     private LocalDateTime reservationDateTime;
 
     // 실제로 전송된 시간
     @Column(name = "sent_date_time")
     private LocalDateTime sentDateTime;
 
-    @Column(nullable = false)
+    @NotNull
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
-    @Column(name = "retry_count", nullable = false)
+    @NotNull
+    @Column(name = "retry_count")
     private int retryCount;
 
     @Column(name = "fail_reason", columnDefinition = "TEXT")
