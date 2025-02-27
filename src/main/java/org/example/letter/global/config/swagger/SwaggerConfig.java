@@ -13,24 +13,24 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        final String securitySchemeName = "BearerAuth";
-        return new OpenAPI()
-                .components(new Components()
-                        // Bearer 토큰 보안 스키마 추가
-                        .addSecuritySchemes(securitySchemeName,
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")
-                        ))
-                // 전역 보안 요구사항 추가
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
-                .info(apiInfo());
-    }
-    private Info apiInfo() {
-        return new Info()
+        Info info = new Info()
                 .title("Spring Boot REST API Specifications")
                 .description("Specification")
                 .version("1.0.0");
+
+        // 단일 보안 스키마 정의 (BearerAuth)
+        String securitySchemeName = "BearerAuth";
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(securitySchemeName);
+        Components components = new Components()
+                .addSecuritySchemes(securitySchemeName, new SecurityScheme()
+                        .name(securitySchemeName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT"));
+        
+        return new OpenAPI()
+                .info(info)
+                .addSecurityItem(securityRequirement)
+                .components(components);
     }
 }
