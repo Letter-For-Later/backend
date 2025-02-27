@@ -15,14 +15,14 @@ public class AuthTokensGenerator {
     private final JwtTokenProvider jwtTokenProvider;
 
     //id 받아 Access Token 생성
-    public AuthTokens generate(String uid) {
+    public AuthTokens generate(String email, String uid) {
         long now = (new Date()).getTime();
         Date accessTokenExpiredAt = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         Date refreshTokenExpiredAt = new Date(now + REFRESH_TOKEN_EXPIRE_TIME);
 
         //String subject = email.toString();
-        String accessToken = jwtTokenProvider.accessTokenGenerate(uid, accessTokenExpiredAt);
-        String refreshToken = jwtTokenProvider.refreshTokenGenerate(uid, refreshTokenExpiredAt);
+        String accessToken = jwtTokenProvider.accessTokenGenerate(email, uid, accessTokenExpiredAt);
+        String refreshToken = jwtTokenProvider.refreshTokenGenerate(email,uid, refreshTokenExpiredAt);
 
         return AuthTokens.of(accessToken, refreshToken, BEARER_TYPE, ACCESS_TOKEN_EXPIRE_TIME / 1000L);
     }
@@ -32,12 +32,14 @@ public class AuthTokensGenerator {
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new RuntimeException("Invalid refresh token");
         }
-        // refresh token에서 uid 추출
-        String uid = jwtTokenProvider.getSubject(refreshToken);
+
+        String email = jwtTokenProvider.getSubject(refreshToken);
+        String uid = jwtTokenProvider.getClaim(refreshToken, "uid");
+
 
         long now = (new Date()).getTime();
         Date accessTokenExpiredAt = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-        String newAccessToken = jwtTokenProvider.accessTokenGenerate(uid, accessTokenExpiredAt);
+        String newAccessToken = jwtTokenProvider.accessTokenGenerate(email, uid, accessTokenExpiredAt);
 
         // 여기서는 refresh token은 그대로 재사용합니다.
         return new AuthTokens(newAccessToken, refreshToken, BEARER_TYPE, ACCESS_TOKEN_EXPIRE_TIME / 1000L);

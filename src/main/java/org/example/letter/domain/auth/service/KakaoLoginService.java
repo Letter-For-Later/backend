@@ -152,7 +152,7 @@ public class KakaoLoginService {
             userRepository.save(kakaoUser);
         }
         //토큰 생성
-        AuthTokens token=authTokensGenerator.generate(uid.toString());
+        AuthTokens token=authTokensGenerator.generate(kakaoEmail, uid.toString());
         return new LoginResponse(uid,nickName,kakaoEmail,token);
     }
 
