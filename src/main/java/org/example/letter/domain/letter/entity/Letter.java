@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.example.letter.domain.notification.entity.Notification;
 import org.example.letter.global.domain.BaseEntity;
+import org.example.letter.domain.user.entity.User;
 
 import java.time.LocalDateTime;
 
@@ -35,8 +36,12 @@ public class Letter extends BaseEntity {
     @OneToOne(mappedBy = "letter", cascade = CascadeType.ALL)
     private Notification notification;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Builder
-    private Letter(String sender, String content, String receiver, LetterStatus status) {
+    private Letter(String sender, String content, String receiver, LetterStatus status, User user) {
         if (status == LetterStatus.RESERVED) {
             validateForReservation(sender, content, receiver);
         }
@@ -45,6 +50,7 @@ public class Letter extends BaseEntity {
         this.content = content;
         this.receiver = receiver;
         this.status = status;
+        this.user = user;
     }
 
     private void validateForReservation(String sender, String content, String receiver) {
