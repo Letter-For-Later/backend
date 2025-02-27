@@ -11,14 +11,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOriginPatterns(
-                    "http://localhost:8081",
-                    "https://localhost:8081",
+                    "http://localhost:3000",
+                    "https://letter-for-later.netlify.app",
                     "http://sxzbbamahrynkdgc.tunnel-pt.elice.io",
                     "https://sxzbbamahrynkdgc.tunnel-pt.elice.io"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .exposedHeaders("Authorization")  // JWT 토큰을 위한 헤더 노출
+                .exposedHeaders("Authorization")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
