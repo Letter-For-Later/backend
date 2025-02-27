@@ -12,10 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOriginPatterns(
                     "http://localhost:8081",
-                    "https://sxzbbamahrynkdgc.tunnel-pt.elice.io"  // 엘리스 클라우드 터널링 도메인
+                    "https://localhost:8081",
+                    "http://sxzbbamahrynkdgc.tunnel-pt.elice.io",
+                    "https://sxzbbamahrynkdgc.tunnel-pt.elice.io"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("Authorization")  // JWT 토큰을 위한 헤더 노출
                 .allowCredentials(true)
                 .maxAge(3600);
     }
