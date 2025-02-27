@@ -1,5 +1,6 @@
 package org.example.letter.domain.auth.auth.custom;
 
+import java.util.UUID;
 import org.example.letter.domain.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,6 +20,13 @@ public class CustomUserDetails implements UserDetails {
     public User getUser() {
         return this.user;
     }
+
+    //사용자 UUID
+    public UUID getUserId() {
+        return user.getUid();
+    }
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
