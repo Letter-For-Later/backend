@@ -46,19 +46,25 @@ public class LetterResponseDTO {
     @Builder
     public static class LetterListResponse {
         private List<LetterListItem> letters;
+        private boolean isReceived;
+        //isReceived = true: 받은 편지 목록을 조회할 때 → 발신자(sender)의 이름을 보여줌
+        //isReceived = false: 보낸 편지 목록을 조회할 때 → 수신자(receiver)의 이름을 보여줌
 
         public static LetterListResponse of(List<Letter> letters, boolean isReceived) {
             List<LetterListItem> items = letters.stream()
                     .map(letter -> LetterListItem.builder()
                             .letterId(letter.getId())
-                            .date(letter.getNotification().getReservationDateTime().toLocalDate())
-                            .timeStatus(convertToTimeStatus(letter.getNotification().getReservationDateTime().toLocalTime()))
+                            .date(letter.getNotification() != null ? 
+                                    letter.getNotification().getReservationDateTime().toLocalDate() : null)
+                            .timeStatus(letter.getNotification() != null ? 
+                                    convertToTimeStatus(letter.getNotification().getReservationDateTime().toLocalTime()) : null)
                             .name(isReceived ? letter.getSender() : letter.getReceiver())
                             .build())
                     .collect(Collectors.toList());
 
             return LetterListResponse.builder()
                     .letters(items)
+                    .isReceived(isReceived)
                     .build();
         }
     }
