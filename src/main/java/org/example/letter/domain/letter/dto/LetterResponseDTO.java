@@ -72,38 +72,31 @@ public class LetterResponseDTO {
     @Getter
     @Builder
     public static class LetterDetailResponse {
-        private LocalDate reservationDate;    // 예약 날짜
-        private TimeStatus timeStatus;        // 시간 상태 (MORNING, LUNCH, DINNER)
-        private String recipientOrSender;     // 수신자 또는 발신자
-        private Long daysUntilReservation;    // 예약까지 남은 일수 (예약 편지만)
-        private String content;               // 내용
+        private String sender;
+        private String content;
+        private String receiver;
+        private LocalDateTime createdAt;
+        private LocalDateTime reservationDateTime;
 
-        public static LetterDetailResponse fromReserved(Letter letter) {
-            LocalDateTime reservationDateTime = letter.getNotification().getReservationDateTime();
+        // URL을 통한 수신자의 일회성 조회용
+        public static LetterDetailResponse from(Letter letter) {
             return LetterDetailResponse.builder()
-                    .reservationDate(reservationDateTime.toLocalDate())
-                    .timeStatus(convertToTimeStatus(reservationDateTime.toLocalTime()))
-                    .recipientOrSender(letter.getReceiver())
-                    .daysUntilReservation(ChronoUnit.DAYS.between(
-                            LocalDate.now(), reservationDateTime.toLocalDate()))
+                    .sender(letter.getSender())
                     .content(letter.getContent())
+                    .receiver(letter.getReceiver())
+                    .createdAt(letter.getCreatedAt())
                     .build();
         }
 
+        // 발신자의 편지 조회용 (예약/발송/임시저장 상태 포함)
         public static LetterDetailResponse fromSentOrReceived(Letter letter, boolean isReceived) {
-            LocalDateTime reservationDateTime = letter.getNotification().getReservationDateTime();
             return LetterDetailResponse.builder()
-                    .reservationDate(reservationDateTime.toLocalDate())
-                    .timeStatus(convertToTimeStatus(reservationDateTime.toLocalTime()))
-                    .recipientOrSender(isReceived ? letter.getSender() : letter.getReceiver())
+                    .sender(letter.getSender())
                     .content(letter.getContent())
-                    .build();
-        }
-
-        public static LetterDetailResponse fromDraft(Letter letter) {
-            return LetterDetailResponse.builder()
-                    .recipientOrSender(letter.getReceiver())
-                    .content(letter.getContent())
+                    .receiver(letter.getReceiver())
+                    .createdAt(letter.getCreatedAt())
+                    .reservationDateTime(letter.getNotification() != null ? 
+                            letter.getNotification().getReservationDateTime() : null)
                     .build();
         }
     }
