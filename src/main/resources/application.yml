@@ -26,7 +26,14 @@ kakao:
 
 logging:
   level:
-    org.hibernate.SQL: debug          # SQL 쿼리 확인
-    org.hibernate.orm.jdbc.bind: trace    # 쿼리 파라미터 확인
-    com.letter: debug                 # 프로젝트 패키지의 모든 로그
+    org.hibernate.SQL: debug # SQL 쿼리 확인
+    org.hibernate.orm.jdbc.bind: trace # 쿼리 파라미터 확인
+    com.letter: debug # 프로젝트 패키지의 모든 로그
 
+coolsms:
+  api-key: ${SMS_API_KEY} # 발급받은 API 키
+  api-secret: ${SMS_SECRET_KEY} # 발급받은 Secret
+  sender: ${SMS_PHONE_NUMBER} # 등록한 발신번호
+
+app:
+  domain: ${ELICE_URL}
