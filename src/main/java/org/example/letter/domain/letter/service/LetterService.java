@@ -10,6 +10,7 @@ import org.example.letter.domain.letter.exception.LetterException;
 import org.example.letter.domain.letter.repository.LetterRepository;
 import org.example.letter.domain.user.entity.User;
 import org.example.letter.domain.user.repository.UserRepository;
+import org.example.letter.global.config.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,14 +26,28 @@ public class LetterService { // 서비스 인터페이스 추가하기
 
     private final LetterRepository letterRepository;
     private final UserRepository userRepository;
+    private final AppProperties appProperties;  // AppProperties 주입 추가
     private static final Logger log = LoggerFactory.getLogger(LetterService.class);
 
     @Transactional
     public void saveReservationLetter(UUID userId, LetterRequestDTO.ReservationRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        Letter letter = request.toEntity(user);
-        letterRepository.save(letter);
+        
+        // 1. Letter 엔티티 생성
+        Letter letter = Letter.builder()
+                .sender(request.getSender())
+                .content(request.getContent())
+                .receiver(request.getReceiver())
+                .status(LetterStatus.RESERVED)
+                .user(user)
+                .build();
+        
+        // 2. Letter를 먼저 저장하여 ID 생성
+        letter = letterRepository.save(letter);  // 저장된 엔티티를 다시 받아옴
+        
+        // 3. ID가 생성된 후 Notification 생성
+        letter.reserve(request.getPhoneNumber(), request.getReservationDateTime(), appProperties);
     }
 
     @Transactional
@@ -81,4 +96,9 @@ public class LetterService { // 서비스 인터페이스 추가하기
         return letterRepository.findByIdAndUserUid(letterId, userId)
                 .orElseThrow(() -> new LetterException(LetterErrorCode.LETTER_NOT_FOUND));
     }
+    public Letter getLetterByIdAndNotificationId(Long letterId, String notificationId) {
+        return letterRepository.findByIdAndNotificationId(letterId, notificationId)
+                .orElseThrow(() -> new LetterException(LetterErrorCode.LETTER_NOT_FOUND));
+    }
+
 }
