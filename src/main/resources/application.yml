@@ -30,3 +30,7 @@ logging:
     org.hibernate.orm.jdbc.bind: trace    # 쿼리 파라미터 확인
     com.letter: debug                 # 프로젝트 패키지의 모든 로그
 
+alice:
+  api:
+    url: ${ALICE_URL}
+    key: ${API-KEY}
