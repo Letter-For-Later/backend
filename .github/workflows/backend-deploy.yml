@@ -36,7 +36,7 @@ jobs:
           kakao.redirect-uri: ${{ secrets.REDIRECT_URI }}
           coolsms.api-key: ${{ secrets.SMS_API_KEY }}
           coolsms.api-secret: ${{ secrets.SMS_SECRET_KEY }}
-          coolsms.sender: ${{ SMS_PHONE_NUMBER }}
+          coolsms.sender: ${{ secrets.SMS_PHONE_NUMBER }}
 
       - name: Gradle 빌드
         run: |
