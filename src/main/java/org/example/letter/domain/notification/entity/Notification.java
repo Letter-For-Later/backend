@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.example.letter.domain.letter.entity.Letter;
 import org.example.letter.global.config.AppProperties;
 import org.example.letter.global.domain.BaseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,9 +18,18 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "notification")
+@Table(
+    name = "notification",
+    indexes = {
+        @Index(
+            name = "idx_notification_status_reservation",
+            columnList = "status,reservation_date_time"
+        )
+    }
+)
 public class Notification extends BaseEntity {
     private static final int MAX_RETRY_COUNT = 3;  // 최대 재시도 횟수
+    private static final Logger log = LoggerFactory.getLogger(Notification.class);
 
     @Id
     @Column(name = "notification_id")
@@ -69,7 +80,17 @@ public class Notification extends BaseEntity {
     }
 
     private String generateAccessUrl(AppProperties appProperties) {
-        return appProperties.getDomain() + "/letters/" + this.letter.getId() + "/view/" + this.id;
+        log.debug("Domain: {}", appProperties.getDomain());  // 도메인 값 로깅
+        log.debug("Letter ID: {}", this.letter.getId());     // letter ID 로깅
+        
+        String url = String.format("%s/letters/%d/view/%s",
+            appProperties.getDomain(),
+            this.letter.getId(),
+            this.id
+        );
+        
+        log.debug("Generated URL: {}", url);  // 생성된 전체 URL 로깅
+        return url;
     }
 
     // 발송 가능 여부 확인

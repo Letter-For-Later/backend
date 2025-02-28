@@ -18,10 +18,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.AssertTrue;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.example.letter.global.config.AppProperties;
 
 public class LetterRequestDTO {
 
@@ -124,7 +123,7 @@ public class LetterRequestDTO {
             return LocalDateTime.of(reservationDate, LocalTime.of(timeStatus.getHour(), 0));
         }
 
-        public Letter toEntity(User user) {
+        public Letter toEntity(User user, AppProperties appProperties) {
             Letter letter = Letter.builder()
                     .sender(sender)
                     .content(content)
@@ -133,7 +132,7 @@ public class LetterRequestDTO {
                     .user(user)
                     .build();
 
-            letter.reserve(phoneNumber, getReservationDateTime());
+            letter.reserve(phoneNumber, getReservationDateTime(), appProperties);
 
             return letter;
         }
