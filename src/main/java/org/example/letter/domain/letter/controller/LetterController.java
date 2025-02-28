@@ -1,11 +1,13 @@
 package org.example.letter.domain.letter.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.letter.domain.auth.auth.custom.CustomUserDetails;
 import org.example.letter.domain.letter.docs.LetterControllerDocs;
 import org.example.letter.domain.letter.dto.LetterRequestDTO;
 import org.example.letter.domain.letter.dto.LetterResponseDTO;
 import org.example.letter.domain.letter.service.LetterService;
 import org.example.letter.global.payload.CommonResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,17 +24,19 @@ public class LetterController implements LetterControllerDocs {
 
     @PostMapping("/reservation")
     public CommonResponse<Void> saveReservationLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @RequestBody @Validated LetterRequestDTO.ReservationRequest request
     ) {
-        letterService.saveReservationLetter(request);
+        letterService.saveReservationLetter(authentication.getUserId(), request);
         return CommonResponse.onSuccess(null);
     }
 
     @PostMapping("/draft")
     public CommonResponse<Void> saveDraftLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @RequestBody @Validated LetterRequestDTO.DraftRequest request
     ) {
-        letterService.saveDraftLetter(request);
+        letterService.saveDraftLetter(authentication.getUserId(), request);
         return CommonResponse.onSuccess(null);
     }
 
@@ -45,8 +49,10 @@ public class LetterController implements LetterControllerDocs {
     }
 
     @GetMapping("/summary")
-    public CommonResponse<LetterResponseDTO.LetterSummaryResponse> getLetterSummary() {
-        return CommonResponse.onSuccess(letterService.getLetterSummary());
+    public CommonResponse<LetterResponseDTO.LetterSummaryResponse> getLetterSummary(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
+        return CommonResponse.onSuccess(letterService.getLetterSummary(authentication.getUserId()));
     }
 
     // 날짜, 시간, 수신자(내가 보내서 받는 사람)
@@ -57,10 +63,12 @@ public class LetterController implements LetterControllerDocs {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/reserved")
-    public CommonResponse<LetterResponseDTO.LetterListResponse> getReservedLetters() {
+    public CommonResponse<LetterResponseDTO.LetterListResponse> getReservedLetters(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterListResponse.of(
-                        letterService.getReservedLetters(), false));
+                        letterService.getReservedLetters(authentication.getUserId()), false));
     }
 
     // 날짜, 시간, 수신자(내가 보내서 받는 사람)
@@ -71,10 +79,12 @@ public class LetterController implements LetterControllerDocs {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/sent")
-    public CommonResponse<LetterResponseDTO.LetterListResponse> getSentLetters() {
+    public CommonResponse<LetterResponseDTO.LetterListResponse> getSentLetters(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterListResponse.of(
-                        letterService.getSentLetters(), false));
+                        letterService.getSentLetters(authentication.getUserId()), false));
     }
 
     // 날짜, 시간, 발신자(나에게 보낸 사람)
@@ -85,10 +95,12 @@ public class LetterController implements LetterControllerDocs {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/received")
-    public CommonResponse<LetterResponseDTO.LetterListResponse> getReceivedLetters() {
+    public CommonResponse<LetterResponseDTO.LetterListResponse> getReceivedLetters(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterListResponse.of(
-                        letterService.getReceivedLetters(), true));
+                        letterService.getReceivedLetters(authentication.getUserId()), true));
     }
 
     // letterId 와 이름을 리스트로 담아서 주자
@@ -99,10 +111,12 @@ public class LetterController implements LetterControllerDocs {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/drafts")
-    public CommonResponse<LetterResponseDTO.LetterListResponse> getDraftLetters() {
+    public CommonResponse<LetterResponseDTO.LetterListResponse> getDraftLetters(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterListResponse.of(
-                        letterService.getDraftLetters(), false));
+                        letterService.getDraftLetters(authentication.getUserId()), false));
     }
 
     // 날짜, 시간, 수신자(내가 보내서 받는 사람), 내용, 발송까지 남은 기간(day)
@@ -114,11 +128,12 @@ public class LetterController implements LetterControllerDocs {
     })
     @GetMapping("/reserved/{letterId}")
     public CommonResponse<LetterResponseDTO.LetterDetailResponse> getReservedLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @PathVariable Long letterId
     ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterDetailResponse.fromReserved(
-                        letterService.getLetter(letterId)));
+                        letterService.getLetter(authentication.getUserId(), letterId)));
     }
 
     // 날짜, 시간, 수신자(내가 보내서 받는 사람), 내용
@@ -130,11 +145,12 @@ public class LetterController implements LetterControllerDocs {
     })
     @GetMapping("/sent/{letterId}")
     public CommonResponse<LetterResponseDTO.LetterDetailResponse> getSentLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @PathVariable Long letterId
     ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterDetailResponse.fromSentOrReceived(
-                        letterService.getLetter(letterId), false));
+                        letterService.getLetter(authentication.getUserId(), letterId), false));
     }
 
     // 날짜, 시간, 발신자(나에게 보낸 사람), 내용
@@ -146,11 +162,12 @@ public class LetterController implements LetterControllerDocs {
     })
     @GetMapping("/received/{letterId}")
     public CommonResponse<LetterResponseDTO.LetterDetailResponse> getReceivedLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @PathVariable Long letterId
     ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterDetailResponse.fromSentOrReceived(
-                        letterService.getLetter(letterId), true));
+                        letterService.getLetter(authentication.getUserId(), letterId), true));
     }
 
     // 발신자, 내용, 수신자
@@ -162,10 +179,11 @@ public class LetterController implements LetterControllerDocs {
     })
     @GetMapping("/drafts/{letterId}")
     public CommonResponse<LetterResponseDTO.LetterDetailResponse> getDraftLetter(
+            @AuthenticationPrincipal CustomUserDetails authentication,
             @PathVariable Long letterId
     ) {
         return CommonResponse.onSuccess(
                 LetterResponseDTO.LetterDetailResponse.fromDraft(
-                        letterService.getLetter(letterId)));
+                        letterService.getLetter(authentication.getUserId(), letterId)));
     }
 }

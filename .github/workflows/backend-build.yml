@@ -44,6 +44,9 @@ jobs:
           jwt.secretKey: ${{ secrets.SECRET_KEY }}
           kakao.key.client-id: ${{ secrets.REST_API_KEY }}
           kakao.redirect-uri: ${{ secrets.REDIRECT_URI }}
+          coolsms.api-key: ${{ secrets.SMS_API_KEY }}
+          coolsms.api-secret: ${{ secrets.SMS_SECRET_KEY }}
+          coolsms.sender: ${{ secrets.SMS_PHONE_NUMBER }}
 
       - name: Gradle 빌드 및 테스트
         run: |

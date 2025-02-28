@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.letter.domain.letter.entity.Letter;
+import org.example.letter.global.config.AppProperties;
 import org.example.letter.global.domain.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -57,18 +58,34 @@ public class Notification extends BaseEntity {
     private String failReason;
 
     @Builder
-    private Notification(Letter letter, String phoneNumber, LocalDateTime reservationDateTime) {
-        this.id = UUID.randomUUID().toString();  // UUID 생성
+    private Notification(Letter letter, String phoneNumber, LocalDateTime reservationDateTime, AppProperties appProperties) {
+        this.id = UUID.randomUUID().toString();
         this.letter = letter;
         this.phoneNumber = phoneNumber;
         this.reservationDateTime = reservationDateTime;
         this.status = NotificationStatus.PENDING;
         this.retryCount = 0;
-        this.accessUrl = generateAccessUrl();
+        this.accessUrl = generateAccessUrl(appProperties);
     }
 
-    private String generateAccessUrl() {
-        return "/letters/" + this.letter.getId() + "/view/" + this.id;
+    private String generateAccessUrl(AppProperties appProperties) {
+        return appProperties.getDomain() + "/letters/" + this.letter.getId() + "/view/" + this.id;
+    }
+
+    // 발송 가능 여부 확인
+    public boolean isReadyToSend() {
+        return canSend() && isTimeToSend();
+    }
+
+    // 상태 기반 발송 가능 여부
+    private boolean canSend() {
+        return this.status == NotificationStatus.PENDING ||
+                (this.status == NotificationStatus.FAILED && canRetry());
+    }
+
+    // 예약 시간 도달 여부
+    private boolean isTimeToSend() {
+        return LocalDateTime.now().isAfter(reservationDateTime);
     }
 
     // 발송 성공 처리
@@ -88,18 +105,8 @@ public class Notification extends BaseEntity {
         this.retryCount++;
     }
 
-    public boolean canSend() {
-        return this.status == NotificationStatus.PENDING ||
-                (this.status == NotificationStatus.FAILED && canRetry());
-    }
-
     // 재시도 가능 여부 확인
-    public boolean canRetry() {
+    private boolean canRetry() {
         return this.status == NotificationStatus.FAILED && this.retryCount < MAX_RETRY_COUNT;
-    }
-
-    // 예약 시간이 되었는지 확인
-    public boolean isTimeToSend() {
-        return LocalDateTime.now().isAfter(reservationDateTime);
     }
 }
