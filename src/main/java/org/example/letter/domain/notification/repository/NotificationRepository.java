@@ -13,13 +13,17 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, String> {
     // 발송 대상 조회
-    @Query("SELECT n FROM Notification n " +
-           "WHERE n.status = :status " +
-           "AND n.reservationDateTime <= :dateTime " +
-           "ORDER BY n.reservationDateTime ASC")
-    List<Notification> findAllByStatusAndReservationDateTimeBefore(
-            @Param("status") NotificationStatus status,
-            @Param("dateTime") LocalDateTime dateTime
+    @Query("""
+        SELECT n FROM Notification n 
+        WHERE n.status = :status 
+        AND n.reservationDateTime >= :startDateTime 
+        AND n.reservationDateTime < :endDateTime 
+        ORDER BY n.reservationDateTime ASC
+    """)
+    List<Notification> findAllByStatusAndReservationDateTimeRange(
+        @Param("status") NotificationStatus status,
+        @Param("startDateTime") LocalDateTime startDateTime,
+        @Param("endDateTime") LocalDateTime endDateTime
     );
 
     // 재시도 대상 조회 추가
