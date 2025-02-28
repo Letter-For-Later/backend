@@ -8,6 +8,7 @@ import org.example.letter.domain.letter.exception.LetterException;
 import org.example.letter.domain.notification.entity.Notification;
 import org.example.letter.global.domain.BaseEntity;
 import org.example.letter.domain.user.entity.User;
+import org.example.letter.global.config.AppProperties;
 
 import java.time.LocalDateTime;
 
@@ -117,12 +118,12 @@ public class Letter extends BaseEntity {
         }
     }
 
-    public void reserve(String phoneNumber, LocalDateTime reservationDateTime) {
+    public void reserve(String phoneNumber, LocalDateTime reservationDateTime, AppProperties appProperties) {
         validateReservationDateTime(reservationDateTime);
         validateForReservation(this.sender, this.content, this.receiver);
 
         this.status = LetterStatus.RESERVED;
-        this.notification = createNotification(phoneNumber, reservationDateTime);
+        this.notification = createNotification(phoneNumber, reservationDateTime, appProperties);
     }
 
     public void validateCancel() {
@@ -161,11 +162,12 @@ public class Letter extends BaseEntity {
         }
     }
 
-    private Notification createNotification(String phoneNumber, LocalDateTime reservationDateTime) {
+    private Notification createNotification(String phoneNumber, LocalDateTime reservationDateTime, AppProperties appProperties) {
         return Notification.builder()
                 .letter(this)
                 .phoneNumber(phoneNumber)
                 .reservationDateTime(reservationDateTime)
+                .appProperties(appProperties)
                 .build();
     }
 }
