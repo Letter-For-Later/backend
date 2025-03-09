@@ -7,7 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.letter.domain.letter.entity.Letter;
+import org.example.letter.global.config.AppProperties;
 import org.example.letter.global.domain.BaseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,9 +18,18 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "notification")
+@Table(
+    name = "notification",
+    indexes = {
+        @Index(
+            name = "idx_notification_status_reservation",
+            columnList = "status,reservation_date_time"
+        )
+    }
+)
 public class Notification extends BaseEntity {
     private static final int MAX_RETRY_COUNT = 3;  // 최대 재시도 횟수
+    private static final Logger log = LoggerFactory.getLogger(Notification.class);
 
     @Id
     @Column(name = "notification_id")
@@ -57,18 +69,44 @@ public class Notification extends BaseEntity {
     private String failReason;
 
     @Builder
-    private Notification(Letter letter, String phoneNumber, LocalDateTime reservationDateTime) {
-        this.id = UUID.randomUUID().toString();  // UUID 생성
+    private Notification(Letter letter, String phoneNumber, LocalDateTime reservationDateTime, AppProperties appProperties) {
+        this.id = UUID.randomUUID().toString();
         this.letter = letter;
         this.phoneNumber = phoneNumber;
         this.reservationDateTime = reservationDateTime;
         this.status = NotificationStatus.PENDING;
         this.retryCount = 0;
-        this.accessUrl = generateAccessUrl();
+        this.accessUrl = generateAccessUrl(appProperties);
     }
 
-    private String generateAccessUrl() {
-        return "/letters/" + this.letter.getId() + "/view/" + this.id;
+    private String generateAccessUrl(AppProperties appProperties) {
+        log.debug("Domain: {}", appProperties.getDomain());  // 도메인 값 로깅
+        log.debug("Letter ID: {}", this.letter.getId());     // letter ID 로깅
+        
+        String url = String.format("%s/letters/%d/view/%s",
+            appProperties.getDomain(),
+            this.letter.getId(),
+            this.id
+        );
+        
+        log.debug("Generated URL: {}", url);  // 생성된 전체 URL 로깅
+        return url;
+    }
+
+    // 발송 가능 여부 확인
+    public boolean isReadyToSend() {
+        return canSend() && isTimeToSend();
+    }
+
+    // 상태 기반 발송 가능 여부
+    private boolean canSend() {
+        return this.status == NotificationStatus.PENDING ||
+                (this.status == NotificationStatus.FAILED && canRetry());
+    }
+
+    // 예약 시간 도달 여부
+    private boolean isTimeToSend() {
+        return LocalDateTime.now().isAfter(reservationDateTime);
     }
 
     // 발송 성공 처리
@@ -88,18 +126,8 @@ public class Notification extends BaseEntity {
         this.retryCount++;
     }
 
-    public boolean canSend() {
-        return this.status == NotificationStatus.PENDING ||
-                (this.status == NotificationStatus.FAILED && canRetry());
-    }
-
     // 재시도 가능 여부 확인
-    public boolean canRetry() {
+    private boolean canRetry() {
         return this.status == NotificationStatus.FAILED && this.retryCount < MAX_RETRY_COUNT;
-    }
-
-    // 예약 시간이 되었는지 확인
-    public boolean isTimeToSend() {
-        return LocalDateTime.now().isAfter(reservationDateTime);
     }
 }
